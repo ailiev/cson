@@ -1,0 +1,29 @@
+-- -*- haskell -*-
+
+-- JSON grammar
+-- see http://www.json.org/
+
+Object.         ObjectT     ::= "{" [PairT] "}" ;
+
+separator PairT "," ;
+
+Pair.           PairT       ::= String ":" Value ;
+
+ArrayVal.       Value       ::= ArrayT ;
+ObjectVal.      Value       ::= ObjectT ;
+NumVal.         Value       ::= JNumber ;
+StringVal.      Value       ::= String ;
+LitVal.         Value       ::= Literal ;
+
+NumInt.         JNumber     ::= Integer ;
+NumFloat.       JNumber     ::= Double ;
+
+Array.          ArrayT      ::= "[" [Value] "]" ;
+
+separator Value "," ;
+
+LitTrue.        Literal     ::= "true" ;
+LitFalse.       Literal     ::= "false" ;
+LitNull.        Literal     ::= "null" ;
+
+-- entrypoints ObjectT;
