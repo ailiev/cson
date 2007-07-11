@@ -1,51 +1,106 @@
+#include "get-path.h"
+
+#include <pir/common/logging.h>
+#include <pir/common/utils.h>
+
 #include <Absyn.H>
 #include <Skeleton.H>
 #include <Printer.H>
-#include "Parser.H"
+#include <Parser.H>
 
 #include <vector>
 #include <string>
 
 #include <iostream>
 
+#include <boost/optional/optional.hpp>
+
 #include <stdio.h>
+
 
 using namespace std;
 
+using boost::optional;
 
-class PathFinder : public Skeleton
+namespace
 {
-private:
+    Log::logger_t logger = Log::makeLogger ("get-path",
+					    boost::none,
+					    Just (Log::DEBUG));
+}
 
-    vector<string> _path;
 
-    vector<string> _subpath;
+optional<int> PathFinder::find (const vector<string>& path)
+{
+    _mode = SCALAR;
+    _path = path;
 
-public:
-
-    PathFinder (const vector<string>& path)
-	: _path(path)
-	{}
+    _depth = 0;
     
+    visitObject (_tree);
+    return _int_answer;
+}
 
-    void visitNumInt (NumInt* p) {
-	cout << "*** Got leaf NumInt " << p->integer_ << endl;
-    }
+optional<vector<Value*> > PathFinder::findList (const vector<string>& path)
+{
+    _mode = LIST;
+    _path = path;
 
-    void visitPair (Pair* p) {
-	string name = p->string_;
+    _depth = 0;
+    
+    visitObject (_tree);
+    return _list_answer;
+}
 
-	PrintAbsyn printer;
+
+void PathFinder::visitNumInt (NumInt* p)
+{
+    clog << "*** Found leaf NumInt " << p->integer_ << endl;
+    _int_answer = p->integer_;
+}
+
+void PathFinder::visitAssoc (Assoc* p)
+{
+    string name = p->ident_;
+
+    PrintAbsyn printer;
 	
-	clog << "Visiting Pair " << p->string_ << " = " << printer.print (p->value_) << endl;
+    LOG (Log::DEBUG, logger,
+	 "Visiting assoc " << name << " = " << printer.print (p->value_));
 
-	if (_path.size() > _subpath.size() && _path[_subpath.size()] == name) {
-	    // correct branch, carry on
-	    _subpath.push_back (name);
-	    Skeleton::visitPair (p);
-	}
+    if (_path.size() > _depth && _path[_depth] == name) {
+	// correct branch, carry on
+	++_depth;
+
+	LOG (Log::DEBUG, logger,
+	     "visitAssoc() recursing");
+
+	// the Skeleton version recurses deeper into the syntax tree.
+	Skeleton::visitAssoc (p);
     }
-};
+}
+
+
+void PathFinder::visitListValue (ListValue * tree)
+{
+    clog << "Visiting a list with depth=" << _depth << endl;
+    
+    if (_mode == LIST && _depth == _path.size()) {
+	// we have seen all the elements of the path, so this must be the right
+	// list.
+	
+	// save the list
+	_list_answer = *tree;
+
+	_depth = 0;
+
+	// no need to call parent and continue recursion.
+	return;
+    }
+
+    Skeleton::visitListValue (tree);
+}
+
 
 
 
@@ -57,10 +112,46 @@ int main (int argc, char* argv[])
 	path.push_back (argv[i]);
     }
 
+
+    // we know that only an SList can come out of the parse here, so the dynamic
+    // cast is OK.
     Object *parse_tree = dynamic_cast<Object*> (pObjectT (stdin));
 
-    PathFinder f (path);
+    if (parse_tree == NULL) {
+	cerr << "Error parsing" << endl;
+	return 2;
+    }
+    
+    PathFinder f (parse_tree);
 
-    f.visitObject (parse_tree);
+    {
+	optional<int> answer = f.find (path);
+	if (answer) {
+	    clog << "Found scalar value " << *answer << endl;
+	}
+	else {
+	    clog << "Scalar Not found" << endl;
+	}
+    }
+
+    {
+	optional< vector<Value*> > answer = f.findList (path);
+	if (answer) {
+	    PrintAbsyn printer;
+	    LOG (Log::INFO, logger,
+		 "Found list value:") ;
+	    for (vector<Value*>::iterator i = answer->begin();
+		 i != answer->end();
+		 ++i)
+	    {
+		LOG (Log::INFO, logger,
+		     printer.print (*i));
+	    }
+	}
+	else {
+	    clog << "List Not found" << endl;
+	}
+    }
+    
 
 }
