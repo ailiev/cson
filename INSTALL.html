@@ -1,0 +1,34 @@
+<html>
+<head>
+<link href="../shared/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<h1>C-Json Installation</h1>
+
+<h2>Prerequisites</h2>
+
+
+<ul>
+  <li> A C++ compiler.
+  <li> <code>GHC</code> haskell compiler.
+
+<li><code>bnfc</code> version 2.3b or later, to compile the C-Json parsing and pretty-printing library.
+
+  <li>The <code>flex</code> lexer generator, and the <code>bison</code> parser generator.
+
+  <li>For the Haskell target, need <code>alex</code> lexer generator, and <code>happy</code> parser generator.
+
+</ul>
+
+<h2>Building</h2>
+
+<pre>
+$ make bnfc
+$ make install
+</pre>
+Builds and installs the C++ component. Just builds the Haskell component, which can be used directly from this build directory, by adding <code>json/bnfc/</code> to the Haskell library path.
+
+
+</body>
+</html>

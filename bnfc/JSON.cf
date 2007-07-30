@@ -3,6 +3,12 @@
 -- JSON-like grammar, but somewhat easier to look at.
 -- see http://www.json.org/
 
+comment "/*" "*/" ;
+comment "//" ;
+
+TopLevel.       TopLevelT   ::= [ObjectT] ;
+separator ObjectT "" ;
+
 Object.         ObjectT     ::= "{" [AssocT] "}" ;
 
 separator AssocT "," ;
@@ -26,4 +32,5 @@ LitTrue.        Literal     ::= "true" ;
 LitFalse.       Literal     ::= "false" ;
 LitNull.        Literal     ::= "null" ;
 
-entrypoints ObjectT;
+
+entrypoints TopLevelT ;

@@ -2,20 +2,24 @@
 
 #include <pir/common/logging.h>
 #include <pir/common/utils.h>
+#include <pir/common/function-objs.h>
+#include <pir/common/exceptions.h>
 
-#include <Absyn.H>
-#include <Skeleton.H>
-#include <Printer.H>
-#include <Parser.H>
+
+#include "bnfc/Absyn.H"
+#include "bnfc/Skeleton.H"
+#include "bnfc/Parser.H"
+// for logging
+#include "bnfc/Printer.H"
+
+#include <boost/optional/optional.hpp>
 
 #include <vector>
 #include <string>
 
-#include <iostream>
+#include <cstdio>
 
-#include <boost/optional/optional.hpp>
 
-#include <stdio.h>
 
 
 using namespace std;
@@ -24,10 +28,30 @@ using boost::optional;
 
 namespace
 {
-    Log::logger_t logger = Log::makeLogger ("get-path",
-					    boost::none,
-					    Just (Log::DEBUG));
+    Log::logger_t logger = Log::makeLogger ("json.get-path");
 }
+
+// construct from a stream
+PathFinder::PathFinder (std::FILE * fh)
+    throw (parse_exception)
+{
+    // we know that only an TopLevel can come out of the parse here, so the
+    // dynamic cast is OK.
+    TopLevel *parse_tree = dynamic_cast<TopLevel*> (pTopLevelT (fh));
+
+    if (parse_tree == NULL) {
+	throw parse_exception ("PathFinder could not parse any "
+			       "Json-C objects from its input file stream");
+    }
+    
+    // duplicate what the other cstr does
+
+    // take ownership
+    _tree = auto_ptr<TopLevel> (parse_tree);
+    _depth = 0;
+}
+
+
 
 
 optional<int> PathFinder::find (const vector<string>& path)
@@ -36,8 +60,10 @@ optional<int> PathFinder::find (const vector<string>& path)
     _path = path;
 
     _depth = 0;
+
+    _int_answer = boost::none;
     
-    visitObject (_tree);
+    visitTopLevel (_tree.get());
     return _int_answer;
 }
 
@@ -47,31 +73,69 @@ optional<vector<Value*> > PathFinder::findList (const vector<string>& path)
     _path = path;
 
     _depth = 0;
+
+    _list_answer = boost::none;
     
-    visitObject (_tree);
+    visitTopLevel (_tree.get());
     return _list_answer;
+}
+
+
+vector< vector<int> > PathFinder::squashList
+(const std::vector<Value*> & vals)
+{
+
+    vector< vector<int> > answer (vals.size());
+    
+    std::transform (vals.begin(), vals.end(),
+		    answer.begin(), squashValue);
+
+    return answer;
+}
+
+
+// static
+std::vector<int> PathFinder::squashValue (Value* vl)
+{
+    // do an in-order walk to get a list of all the terminal numeric values.
+    // throws bad_arg_exception if a list is found in the values of this list.
+
+    InOrderCollector coll (vl);
+    return coll.collectValues();
 }
 
 
 void PathFinder::visitNumInt (NumInt* p)
 {
-    clog << "*** Found leaf NumInt " << p->integer_ << endl;
-    _int_answer = p->integer_;
+    if (_mode == SCALAR) {
+	if (_depth == _path.size()) {
+	    LOG (Log::DEBUG, logger, "Found leaf NumInt " << p->integer_);
+	    _int_answer = p->integer_;
+	}
+	else {
+	    // reduce depth. TODO: not sure this suffices to solve the FIXME on
+	    // visitAssoc().
+	    --_depth;
+	}
+    }
 }
 
+// FIXME: this gets called for assocs which are peers in a list, as well as
+// descendants in the syntax tree. thus can end up retrieving peer values in a
+// structure.
 void PathFinder::visitAssoc (Assoc* p)
 {
     string name = p->ident_;
 
-    PrintAbsyn printer;
-	
-    LOG (Log::DEBUG, logger,
-	 "Visiting assoc " << name << " = " << printer.print (p->value_));
+    // FIXME: the following would crash (SEGV) sometimes.
+//     PrintAbsyn printer;
+//     LOG (Log::DEBUG, logger,
+// 	 "Visiting assoc " << name << " = " << printer.print (p->value_));
 
     if (_path.size() > _depth && _path[_depth] == name) {
 	// correct branch, carry on
 	++_depth;
-
+    
 	LOG (Log::DEBUG, logger,
 	     "visitAssoc() recursing");
 
@@ -83,7 +147,8 @@ void PathFinder::visitAssoc (Assoc* p)
 
 void PathFinder::visitListValue (ListValue * tree)
 {
-    clog << "Visiting a list with depth=" << _depth << endl;
+    LOG (Log::DEBUG, logger,
+	 "Visiting a list with depth=" << _depth);
     
     if (_mode == LIST && _depth == _path.size()) {
 	// we have seen all the elements of the path, so this must be the right
@@ -102,56 +167,66 @@ void PathFinder::visitListValue (ListValue * tree)
 }
 
 
-
-
-int main (int argc, char* argv[])
+PathFinder::~PathFinder ()
 {
-    vector<string> path;
+    // _tree is auto-deleted, so nothing to do here.
+}
 
-    for (int i=1; i < argc; i++) {
-	path.push_back (argv[i]);
+
+
+void PathFinder::delete_found_list ()
+{
+    // not necessary, as the list only has pointers into _tree, which is deleted
+    // once by its auto_ptr.
+    if (_list_answer) {
+	for_each (_list_answer->begin(), _list_answer->end(),
+		  deleter<Value>());
     }
+}
 
 
-    // we know that only an SList can come out of the parse here, so the dynamic
-    // cast is OK.
-    Object *parse_tree = dynamic_cast<Object*> (pObjectT (stdin));
 
-    if (parse_tree == NULL) {
-	cerr << "Error parsing" << endl;
-	return 2;
-    }
+//
+//
+// class InOrderCollector
+//
+//
+
+void InOrderCollector::visitNumInt (NumInt* p)
+{
+    LOG (Log::DEBUG, logger,
+	 "collecting int " << p->integer_);
     
-    PathFinder f (parse_tree);
+    _vals.push_back (p->integer_);
+}
 
-    {
-	optional<int> answer = f.find (path);
-	if (answer) {
-	    clog << "Found scalar value " << *answer << endl;
-	}
-	else {
-	    clog << "Scalar Not found" << endl;
-	}
+void InOrderCollector::visitListValue (ListValue *)
+{
+    throw bad_arg_exception
+	("Cannot have a nested list as input to "
+	 "Faerieplay circuit machine");
+}
+ 
+void InOrderCollector::visitValue (Value * v)
+{
+    // rather awkward dispatch here.
+    if (typeid(*v) == typeid(ObjectVal)) {
+	visitObjectVal (dynamic_cast<ObjectVal*>(v));
     }
-
-    {
-	optional< vector<Value*> > answer = f.findList (path);
-	if (answer) {
-	    PrintAbsyn printer;
-	    LOG (Log::INFO, logger,
-		 "Found list value:") ;
-	    for (vector<Value*>::iterator i = answer->begin();
-		 i != answer->end();
-		 ++i)
-	    {
-		LOG (Log::INFO, logger,
-		     printer.print (*i));
-	    }
-	}
-	else {
-	    clog << "List Not found" << endl;
-	}
+    else if (typeid(*v) == typeid(NumVal)) {
+	visitNumVal (dynamic_cast<NumVal*> (v));
     }
-    
-
+    else if (typeid(*v) == typeid(SListVal)) {
+	visitSListVal (dynamic_cast<SListVal*> (v));
+    }    
+    else if (typeid(*v) == typeid(LitVal)) {
+	visitLitVal (dynamic_cast<LitVal*>(v));
+    }
+    else if (typeid(*v) == typeid(StringVal)) {
+	visitStringVal (dynamic_cast<StringVal*>(v));
+    }
+    else {
+	throw runtime_exception ((string) "Unexpected type in visitValue(): "
+				 + typeid(*v).name());
+    }
 }

@@ -1,0 +1,16 @@
+This is a parsing library for a data definition language - C-Json. This may be
+how C syntax would define literals if it could define more things as literals.
+In particular, one can define values for structures with named fields, arrays,
+and simple literals - numbers, strings, booleans and null. The syntax is
+specified in bnfc/JSON.cf, and documented in bnfc/JSON.ps (which is produced by
+"make bnfc").
+
+I call it C-Json as it bears some similarity to the Json (TODO URL) language for
+defining data, but I it think looks rather nicer.
+
+Additionally the library provides simple lookup methods, akin to Xpath for XML.
+Using these, you can extract the value (scalar or array) of any component, named
+as a path of member names, in the data structure.
+
+Some example data files are provided, and the test file test-get-path.cc
+provides usage examples.
