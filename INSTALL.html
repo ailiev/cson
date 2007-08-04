@@ -17,8 +17,7 @@
 
   <li>The <code>flex</code> lexer generator, and the <code>bison</code> parser generator.
 
-  <li>For the Haskell target, need <code>alex</code> lexer generator, and <code>happy</code> parser generator.
-
+  <li>For the Haskell target, need <code>alex</code> lexer generator, <code>happy</code> parser generator, and ghc compiler. See the Faerieplay compiler <a href="../sfdl-compiler/INSTALL.html" >install notes</a> for information about these.
 </ul>
 
 <h2>Building</h2>
@@ -27,7 +26,10 @@
 $ make bnfc
 $ make install
 </pre>
-Builds and installs the C++ component. Just builds the Haskell component, which can be used directly from this build directory, by adding <code>json/bnfc/</code> to the Haskell library path.
+
+Builds and installs the C++ component. Just builds the Haskell component, which
+can be used directly from this build directory, by adding
+<code>BASEDIR/json/bnfc/</code> to the Haskell library path.
 
 
 </body>
