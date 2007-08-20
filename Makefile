@@ -22,14 +22,21 @@ LDLIBFILES	+= -lcommon
 
 all: $(TARGETS)
 
+# FIXME: duplicated from sfdl-compiler makefile.
+ifdef TOOLS_DIR
+HAPPYFLAGS += --template=$(TOOLS_DIR)/usr/share/happy-1.16
+endif
+
+BNFCDIR = bnfc/Json
+
 # require BNFC 2.3b or newer.
 # produces both C++ and Haskell code.
 bnfc:
 	(cd bnfc && bnfc -haskell -m -d Json.cf && mv Makefile Makefile.haskell)
-	$(MAKE) -C bnfc -f Makefile.haskell
+	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
+	alex -g $(BNFCDIR)/Lex.x
 	(cd bnfc && bnfc -m -cpp_stl Json.cf)
 	$(MAKE) -C bnfc Lexer.C Parser.C JSON.ps
-
 
 
 install: $(TARGETS)
