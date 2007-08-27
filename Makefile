@@ -25,6 +25,7 @@ all: $(TARGETS)
 # FIXME: duplicated from sfdl-compiler makefile.
 ifdef TOOLS_DIR
 HAPPYFLAGS += --template=$(TOOLS_DIR)/usr/share/happy-1.16
+ALEXFLAGS += --template=$(TOOLS_DIR)/usr/share/alex-2.1.0
 endif
 
 BNFCDIR = bnfc/Json
@@ -34,9 +35,9 @@ BNFCDIR = bnfc/Json
 bnfc:
 	(cd bnfc && bnfc -haskell -m -d Json.cf && mv Makefile Makefile.haskell)
 	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
-	alex -g $(BNFCDIR)/Lex.x
+	alex $(ALEXFLAGS) -g $(BNFCDIR)/Lex.x
 	(cd bnfc && bnfc -m -cpp_stl Json.cf)
-	$(MAKE) -C bnfc Lexer.C Parser.C JSON.ps
+	$(MAKE) -C bnfc Lexer.C Parser.C Json.ps
 
 
 install: $(TARGETS)
