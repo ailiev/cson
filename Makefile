@@ -44,9 +44,10 @@ bnfc_haskell:
 	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
 	alex $(ALEXFLAGS) -g $(BNFCDIR)/Lex.x
 
-bnfc: $(bnfc_cpp_files) bnfc_haskell
+bncf: $(bnfc_cpp_files) bnfc_haskell
 
-install: bnfc $(TARGETS)
+# make sure we do not try to install bnfc!
+install: $(TARGETS) | bnfc
 	$(INSTALL) $^ $(LEEDS_LIB)
 
 
