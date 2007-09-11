@@ -22,7 +22,7 @@ CPPFLAGS += -I.
 LIBDIRS		+= $(DIST_LIB) . ../common
 LDLIBFILES	+= -lcommon
 
-all: bnfc $(TARGETS)
+all: bnfc  bnfc_haskell $(TARGETS)
 
 # FIXME: duplicated from sfdl-compiler makefile.
 ifdef TOOLS_DIR
