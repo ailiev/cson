@@ -1,3 +1,18 @@
+/*
+ * Simple library to parse and access a JSON-like mini-language for representing
+ * structures.
+ *
+ * Copyright (C) 2003-2007, Alexander Iliev <sasho@cs.dartmouth.edu> and
+ * Sean W. Smith <sws@cs.dartmouth.edu>
+ *
+ * All rights reserved.
+ *
+ * This code is released under a BSD license.
+ * Please see LICENSE.txt for the full license and disclaimers.
+ *
+*/
+
+
 #include "get-path.h"
 
 #include <pir/common/logging.h>
