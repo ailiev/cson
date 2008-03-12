@@ -17,6 +17,7 @@ include $(SHARED_DIR)/utils.make
 include $(SHARED_DIR)/common.make
 include $(SHARED_DIR)/shared-targets.make
 
+PATH += :$(TOOLS_DIR)/usr/bin
 
 TARGETS=libjson.$(LIBEXT)
 
@@ -25,7 +26,7 @@ CPPFLAGS += -I.. -I../pir
 BNFC_CPP_ARTIFACTS = Absyn Printer Skeleton Lexer Parser
 
 vpath %.C bnfc
-LIBSRCS = get-path.cc Absyn.C Lexer.C Parser.C Printer.C Skeleton.C
+LIBSRCS = get-path.cc $(patsubst %,%.C,$(BNFC_CPP_ARTIFACTS))
 TESTSRCS = $(wildcard test-*.cc)
 
 CPPFLAGS += -I.
@@ -46,6 +47,7 @@ BNFCDIR = bnfc/Json
 # require BNFC 2.3b or newer.
 # produces both C++ and Haskell code.
 bnfc_cpp_files=$(patsubst %,bnfc/%.C,$(BNFC_CPP_ARTIFACTS))
+bnfc_cpp: $(bnfc_cpp_files)
 $(bnfc_cpp_files): bnfc/Json.cf
 	(cd bnfc && bnfc -m -cpp_stl Json.cf)
 	$(MAKE) -C bnfc Lexer.C Parser.C Json.ps
@@ -55,7 +57,7 @@ bnfc_haskell:
 	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
 	alex $(ALEXFLAGS) -g $(BNFCDIR)/Lex.x
 
-bncf: $(bnfc_cpp_files) bnfc_haskell
+bncf: bnfc_cpp bnfc_haskell
 
 # make sure we do not try to install bnfc!
 install: $(TARGETS) | bnfc
