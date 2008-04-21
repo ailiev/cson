@@ -1,0 +1,45 @@
+<html>
+<head>
+  <title>C-JSON library</title>
+  <link href="../shared/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>The C-JSON Library</h1>
+
+This is a parsing library for a data definition language - <emph>C-Json</emph>.
+This may be how C syntax would define literals if it could define more things as
+literals. In particular, one can define values for structures with named fields,
+lists, and simple literals - numbers, strings, booleans and null. The syntax is
+specified in <code>bnfc/Json.cf</code>, and documented in <code>bnfc/Json.ps</code> (which is produced by
+<code>make bnfc</code>).
+<p>
+I call it C-Json as it bears some similarity to
+the <a href="http://www.json.org/">Json</a> language for defining data, but I it
+think looks rather nicer.
+<p>
+Additionally the library provides simple lookup methods, akin to Xpath for XML.
+Using these, you can extract the value (scalar or array) of any component, named
+as a path of member names, in the data structure.
+<p>
+  Some example data files are provided, and the test file <code>test-get-path.cc</code>
+provides usage examples.
+
+<h3>Example</h3>
+<code><pre>
+{ a = 1,
+    b = 2,
+    c = [ {x={aa=1, ab=4}, y=2},
+	  {x={aa=3, ab=8}, y=12}
+	 ],
+    d = { a = 23, b = 25 }
+    e = [ 1, 2, 3, 4 ]
+}
+</pre></code>
+
+</p>
+
+</body>
+</html>
+
