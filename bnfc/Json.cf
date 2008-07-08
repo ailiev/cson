@@ -33,6 +33,8 @@ NumVal.         Value       ::= Number ;
 StringVal.      Value       ::= String ;
 LitVal.         Value       ::= Literal ;
 
+-- FIXME: this does not actually allow negative numbers! Need to specify that explicitly
+-- here.
 NumInt.         Number     ::= Integer ;
 NumFloat.       Number     ::= Double ;
 

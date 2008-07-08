@@ -64,48 +64,55 @@ int main (int argc, char* argv[])
     }
 
 
-    PathFinder f (stdin);
+    try {
+	PathFinder f (stdin);
 
-    {
-	optional<int> answer = f.find (path);
-	if (answer) {
-	    cout << "scalar:" << *answer << endl;
+	{
+	    optional<int> answer = f.find (path);
+	    if (answer) {
+		cout << "scalar:" << *answer << endl;
+	    }
+	    else {
+		LOG (Log::INFO, logger, "Scalar Not found");
+	    }
 	}
-	else {
-	    LOG (Log::INFO, logger, "Scalar Not found");
-	}
-    }
 
-    {
-	optional< vector<Value*> > answer = f.findList (path);
-	if (answer) {
-	    PrintAbsyn printer;
-	    LOG (Log::INFO, logger,
-		 "Found list value, printing Value's:") ;
-	    for (vector<Value*>::iterator i = answer->begin();
-		 i != answer->end();
-		 ++i)
-	    {
+	{
+	    optional< vector<Value*> > answer = f.findList (path);
+	    if (answer) {
+		PrintAbsyn printer;
 		LOG (Log::INFO, logger,
-		     printer.print (*i));
-	    }
+		     "Found list value, printing Value's:") ;
+		for (vector<Value*>::iterator i = answer->begin();
+		     i != answer->end();
+		     ++i)
+		{
+		    LOG (Log::INFO, logger,
+			 printer.print (*i));
+		}
 
-	    LOG (Log::INFO, logger,
-		 "Squashing the values and printing the squashed lists");
-	    cout << "list:" << endl;
-	    vector<vector<int> > vals = PathFinder::squashList (*answer);
+		LOG (Log::INFO, logger,
+		     "Squashing the values and printing the squashed lists");
+		cout << "list:" << endl;
+		vector<vector<int> > vals = PathFinder::squashList (*answer);
 	    
-	    for (vector<vector<int> >::iterator i = vals.begin();
-		 i != vals.end();
-		 i++)
-	    {
-		print_seq (cout, *i);
-		cout << endl;
+		for (vector<vector<int> >::iterator i = vals.begin();
+		     i != vals.end();
+		     i++)
+		{
+		    cout << print_seq(*i);
+		    cout << endl;
+		}
+	    }
+	    else {			// !answer
+		LOG (Log::INFO, logger, "List Not found");
 	    }
 	}
-	else {			// !answer
-	    LOG (Log::INFO, logger, "List Not found");
-	}
+
+    }
+    catch (const parse_exception& ex) {
+	cerr << ex.what() << endl
+	     << "Exiting" << endl;
     }
     
 

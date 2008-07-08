@@ -19,7 +19,12 @@ include $(SHARED_DIR)/shared-targets.make
 
 PATH += :$(TOOLS_DIR)/usr/bin
 
-TARGETS=libjson.$(LIBEXT)
+TARGET_LIBS = libjson.$(LIBEXT)
+TARGET_EXES = get-path
+TARGETS= $(TARGET_LIBS) $(TARGET_EXES)
+
+get-path :: LDLIBFILES += -ljson
+get-path : test-get-path.o
 
 CPPFLAGS += -I.. -I../pir
 
@@ -38,10 +43,11 @@ all: bnfc  bnfc_haskell $(TARGETS)
 
 # FIXME: duplicated from sfdl-compiler makefile.
 ifdef TOOLS_DIR
-HAPPYFLAGS += --template=$(TOOLS_DIR)/usr/share/happy-1.16
-ALEXFLAGS += --template=$(TOOLS_DIR)/usr/share/alex-2.1.0
+#HAPPYFLAGS += --template=$(TOOLS_DIR)/usr/share/happy-1.16
+#ALEXFLAGS += --template=$(TOOLS_DIR)/usr/share/alex-2.1.0
 endif
 
+# The haskell generated files go in here:
 BNFCDIR = bnfc/Json
 
 # require BNFC 2.3b or newer.
@@ -52,16 +58,22 @@ $(bnfc_cpp_files): bnfc/Json.cf
 	(cd bnfc && bnfc -m -cpp_stl Json.cf)
 	$(MAKE) -C bnfc Lexer.C Parser.C Json.ps
 
-bnfc_haskell:
+bnfc_haskell_files=$(patsubst %,bnfc/Json/%.hs,$(BNFC_CPP_ARTIFACTS))
+bnfc_haskell: $(bnfc_haskell_files)
+$(bnfc_haskell_files): bnfc/Json.cf
 	(cd bnfc && bnfc -haskell -m -d Json.cf && mv Makefile Makefile.haskell)
 	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
 	alex $(ALEXFLAGS) -g $(BNFCDIR)/Lex.x
 
-bncf: bnfc_cpp bnfc_haskell
+bnfc: bnfc_cpp bnfc_haskell
+
+install: install_libs install_exes
 
 # make sure we do not try to install bnfc!
-install: $(TARGETS) | bnfc
+install_libs: $(TARGET_LIBS)
 	$(INSTALL) $^ $(LEEDS_LIB)
+install_exes: $(TARGET_EXES)
+	$(INSTALL) $^ $(LEEDS_BIN)
 
 
 libjson.so: $(LIBOBJS); $(CXXLINK)
