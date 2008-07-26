@@ -34,8 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _GET_PATH_H
 #define _GET_PATH_H
 
-#include <json/bnfc/Absyn.H>
-#include <json/bnfc/Skeleton.H>
+#include <json/bnfc/Json/Absyn.H>
+#include <json/bnfc/Json/Skeleton.H>
 
 #include <pir/common/exceptions.h>
 

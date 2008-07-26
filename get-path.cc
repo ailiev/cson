@@ -21,11 +21,11 @@
 #include <pir/common/exceptions.h>
 
 
-#include "bnfc/Absyn.H"
-#include "bnfc/Skeleton.H"
-#include "bnfc/Parser.H"
+#include "bnfc/Json/Absyn.H"
+#include "bnfc/Json/Skeleton.H"
+#include "bnfc/Json/Parser.H"
 // for logging
-#include "bnfc/Printer.H"
+#include "bnfc/Json/Printer.H"
 
 #include <boost/optional/optional.hpp>
 

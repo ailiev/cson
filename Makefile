@@ -23,15 +23,20 @@ TARGET_LIBS = libjson.$(LIBEXT)
 TARGET_EXES = get-path
 TARGETS= $(TARGET_LIBS) $(TARGET_EXES)
 
+all: bnfc $(TARGETS)
+
+
 get-path :: LDLIBFILES += -ljson
 get-path : test-get-path.o
 
 CPPFLAGS += -I.. -I../pir
 
-BNFC_CPP_ARTIFACTS = Absyn Printer Skeleton Lexer Parser
+BNFC_ARTIFACTS = Absyn Printer Skeleton Lexer Parser
 
-vpath %.C bnfc
-LIBSRCS = get-path.cc $(patsubst %,%.C,$(BNFC_CPP_ARTIFACTS))
+#vpath %.C $(BNFCDIR)
+#vpath %.o $(BNFCDIR)
+LIBSRCS = get-path.cc $(bnfc_cpp_files)
+# $(patsubst %,%.C,$(BNFC_ARTIFACTS))
 TESTSRCS = $(wildcard test-*.cc)
 
 CPPFLAGS += -I.
@@ -39,7 +44,6 @@ CPPFLAGS += -I.
 LIBDIRS		+= $(DIST_LIB) . ../common
 LDLIBFILES	+= -lcommon
 
-all: bnfc  bnfc_haskell $(TARGETS)
 
 # FIXME: duplicated from sfdl-compiler makefile.
 ifdef TOOLS_DIR
@@ -47,25 +51,33 @@ ifdef TOOLS_DIR
 #ALEXFLAGS += --template=$(TOOLS_DIR)/usr/share/alex-2.1.0
 endif
 
-# The haskell generated files go in here:
+# The bnfc-generated files go in here.
+# This dir contains only generated files and can be removed.
 BNFCDIR = bnfc/Json
 
 # require BNFC 2.3b or newer.
 # produces both C++ and Haskell code.
-bnfc_cpp_files=$(patsubst %,bnfc/%.C,$(BNFC_CPP_ARTIFACTS))
+bnfc: bnfc_pre bnfc_cpp bnfc_haskell
+
+bnfc_pre:
+	mkdir -p $(BNFCDIR)
+
+bnfc_cpp_files=$(patsubst %,$(BNFCDIR)/%.C,$(BNFC_ARTIFACTS))
 bnfc_cpp: $(bnfc_cpp_files)
 $(bnfc_cpp_files): bnfc/Json.cf
-	(cd bnfc && bnfc -m -cpp_stl Json.cf)
-	$(MAKE) -C bnfc Lexer.C Parser.C Json.ps
+	(cd $(BNFCDIR) && bnfc -m -cpp_stl ../Json.cf)
+	$(MAKE) -C $(BNFCDIR) Lexer.C Parser.C Json.ps
+	ps2pdf $(BNFCDIR)/Json.ps $(BNFCDIR)/Doc.pdf
 
-bnfc_haskell_files=$(patsubst %,bnfc/Json/%.hs,$(BNFC_CPP_ARTIFACTS))
+bnfc_haskell_files=$(patsubst %,$(BNFCDIR)/%.hs,$(BNFC_ARTIFACTS))
 bnfc_haskell: $(bnfc_haskell_files)
+# Explicit calls to happy and alex are so we can pass them custom flags.
+# Otherwise the generated Makefile.haskell can invoke them too.
 $(bnfc_haskell_files): bnfc/Json.cf
-	(cd bnfc && bnfc -haskell -m -d Json.cf && mv Makefile Makefile.haskell)
+	(cd bnfc && bnfc -haskell -m -d Json.cf && mv Makefile Json/Makefile.haskell)
 	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
 	alex $(ALEXFLAGS) -g $(BNFCDIR)/Lex.x
 
-bnfc: bnfc_cpp bnfc_haskell
 
 install: install_libs install_exes
 
@@ -87,4 +99,4 @@ $(TESTEXES): $(LIBOBJS)
 include $(SHARED_DIR)/footer.make
 
 
-.PHONY: bnfc bnfc_haskell
+.PHONY: bnfc bnfc_haskell bnfc_cpp bnfc_pre

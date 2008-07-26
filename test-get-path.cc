@@ -18,9 +18,9 @@
 #include <pir/common/logging.h>
 #include <pir/common/utils.h>
 
-#include <json/bnfc/Absyn.H>
-#include <json/bnfc/Printer.H>
-#include <json/bnfc/Parser.H>
+#include <json/bnfc/Json/Absyn.H>
+#include <json/bnfc/Json/Printer.H>
+#include <json/bnfc/Json/Parser.H>
 
 #include <boost/optional/optional.hpp>
 
