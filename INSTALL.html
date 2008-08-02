@@ -1,10 +1,11 @@
 <html>
 <head>
-<link href="../shared/style.css" rel="stylesheet" type="text/css" />
+  <title>CSon Installation</title>
+  <link href="../shared/style.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
-<h1>C-Json Installation</h1>
+<h1>Cson Installation</h1>
 
 <h2>Prerequisites</h2>
 
@@ -23,14 +24,18 @@
 <h2>Building</h2>
 
 <pre class="command">
-$ make bnfc
+$ cd <a href="../docs/INSTALL.html#basedir-intro">BASEDIR</a>/json
 $ make install
 </pre>
 
-Builds and installs the C++ component. Just builds the Haskell component, which
-can be used directly from this build directory, by adding
-<code>BASEDIR/json/bnfc/</code> to the Haskell library path.
 
+<ul>
+  <li>Builds the C++ component and installs the shared libraries.</li>
+<li>Builds the Haskell component, which
+can be used directly from this build directory, by adding
+  <code>BASEDIR/json/bnfc/</code> to the Haskell library path.</li>
+
+</ul>
 
 </body>
 </html>

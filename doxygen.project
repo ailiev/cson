@@ -1,4 +1,4 @@
-PROJECT_NAME           = "C-Json"
+PROJECT_NAME           = "Cson"
 PROJECT_NUMBER         = 1
 OUTPUT_DIRECTORY       = $(OUTPUT_DIRECTORY)
 EXTRACT_ALL            = YES
