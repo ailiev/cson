@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <json/bnfc/Json/Absyn.H>
 #include <json/bnfc/Json/Skeleton.H>
 
-#include <pir/common/exceptions.h>
+#include <faerieplay/common/exceptions.h>
 
 #include <vector>
 #include <string>

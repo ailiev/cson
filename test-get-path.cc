@@ -15,8 +15,8 @@
 
 #include "get-path.h"
 
-#include <pir/common/logging.h>
-#include <pir/common/utils.h>
+#include <faerieplay/common/logging.h>
+#include <faerieplay/common/utils.h>
 
 #include <json/bnfc/Json/Absyn.H>
 #include <json/bnfc/Json/Printer.H>

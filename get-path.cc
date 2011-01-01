@@ -15,10 +15,10 @@
 
 #include "get-path.h"
 
-#include <pir/common/logging.h>
-#include <pir/common/utils.h>
-#include <pir/common/function-objs.h>
-#include <pir/common/exceptions.h>
+#include <faerieplay/common/logging.h>
+#include <faerieplay/common/utils.h>
+#include <faerieplay/common/function-objs.h>
+#include <faerieplay/common/exceptions.h>
 
 
 #include "bnfc/Json/Absyn.H"

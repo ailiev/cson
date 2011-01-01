@@ -17,6 +17,8 @@ include $(SHARED_DIR)/utils.make
 include $(SHARED_DIR)/common.make
 include $(SHARED_DIR)/shared-targets.make
 
+EXTRA_INCLUDE_DIRS = $(DIST_ROOT)/include
+
 
 TARGET_LIBS = libjson.$(LIBEXT)
 TARGET_EXES = get-path
@@ -84,6 +86,7 @@ init::
 bnfc_cpp: $(bnfc_cpp_files)
 $(bnfc_cpp_files): bnfc/Json.cf
 	(cd $(BNFCDIR) && bnfc -m -cpp_stl ../Json.cf)
+	ed $(BNFCDIR)/Json.y < add-include.ed
 	$(MAKE) -C $(BNFCDIR) Lexer.C Parser.C Json.ps
 	ps2pdf $(BNFCDIR)/Json.ps $(BNFCDIR)/Doc.pdf
 
