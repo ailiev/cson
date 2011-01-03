@@ -97,7 +97,8 @@ $(bnfc_haskell_files): bnfc/Json.cf
 	(cd bnfc && bnfc -haskell -m -d Json.cf && mv Makefile Json/Makefile.haskell)
 	happy $(HAPPYFLAGS) -gca $(BNFCDIR)/Par.y
 	alex $(ALEXFLAGS) -g $(BNFCDIR)/Lex.x
-
+	cp json.cabal LICENSE.txt bnfc/
+	(cd bnfc && cabal install)
 
 bnfc_cpp_objs=$(bnfc_cpp_files:.C=.o)
 #$(info bnfc_cpp_objs=$(bnfc_cpp_objs))
