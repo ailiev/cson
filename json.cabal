@@ -1,0 +1,15 @@
+Name:                faerieplay-json
+Version:             0.1.0
+Description:         Haskell library for the Faerieplay CSon data format.
+License:             BSD3
+License-file:        LICENSE.txt
+Author:              Alexander Iliev
+Maintainer:          alex DOT iliev AT gmail DOT com
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Library
+  Build-Depends:     haskell98,
+                     base >= 3 && < 5,
+                     array
+  Exposed-modules:   Json.Par, Json.Lex, Json.Abs, Json.ErrM
