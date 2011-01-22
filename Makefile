@@ -13,11 +13,15 @@
 
 include config.make
 
-include $(SHARED_DIR)/utils.make
-include $(SHARED_DIR)/common.make
-include $(SHARED_DIR)/shared-targets.make
-
+# need this before including header.make
 EXTRA_INCLUDE_DIRS = $(DIST_ROOT)/include
+
+make_incl_dir=$(DIST_ROOT)/make_include/faerieplay/common
+
+include $(make_incl_dir)/utils.make
+include $(make_incl_dir)/header.make
+include $(make_incl_dir)/shared-targets.make
+
 
 
 TARGET_LIBS = libjson.$(LIBEXT)
@@ -43,8 +47,6 @@ get-path :: LDLIBFILES += -ljson
 # functions.
 get-path : test-get-path.o 
 
-CPPFLAGS += -I.. -I../pir
-
 # BNFC produces somewhat different-looking artifacts for C++ and Haskell.
 BNFC_ARTIFACTS_CPP = Absyn Printer Skeleton Lexer Parser
 BNFC_ARTIFACTS_HS = Abs ErrM Lex Par Print Skel Test
@@ -60,8 +62,9 @@ TESTSRCS = $(wildcard test-*.cc)
 
 CPPFLAGS += -I.
 
-LIBDIRS		+= $(DIST_LIB) . ../common
-LDLIBFILES	+= -lcommon
+# external libraries. they get added into LDLIBS in header.make
+LIBDIRS		+= $(DIST_LIB) .
+LDLIBFILES	+= -lfaerieplay-common
 
 
 # FIXME: duplicated from sfdl-compiler makefile.
@@ -118,6 +121,6 @@ $(TESTEXES): $(LIBOBJS)
 # Add this command to the 'clean' step.
 CLEAN_HOOK = $(RM) -r $(BNFCDIR)
 
-include $(SHARED_DIR)/footer.make
+include $(make_incl_dir)/footer.make
 
 .PHONY: bnfc bnfc_haskell bnfc_cpp

@@ -1,5 +1,7 @@
-# where are shared make files?
-SHARED_DIR=../pir
+FAERIEPLAY_DIST_ROOT ?= $(HOME)/faerieplay
 
-# install into the central Faerieplay directory. Change this if desired.
-DIST_ROOT = $(LEEDS_ROOT)
+DIST_ROOT ?= $(FAERIEPLAY_DIST_ROOT)
+
+ifeq ($(DIST_ROOT),)
+$(error Please set the environment variable FAERIEPLAY_DIST_ROOT)
+endif
