@@ -22,6 +22,8 @@ include $(make_incl_dir)/utils.make
 include $(make_incl_dir)/header.make
 include $(make_incl_dir)/shared-targets.make
 
+HEADERS=get-path.h
+BNFC_HEADERS=bnfc/Json/Absyn.H bnfc/Json/Parser.H bnfc/Json/Printer.H bnfc/Json/Skeleton.H
 
 
 TARGET_LIBS = libjson.$(LIBEXT)
@@ -30,14 +32,18 @@ TARGETS= $(TARGET_LIBS) $(TARGET_EXES)
 
 all: init $(TARGETS)
 
-install: init install_libs install_exes
+install: init install_libs install_exes install_hdrs
 
 # make sure we do not try to install bnfc!
-.PHONY: install_libs install_exes
+.PHONY: install_libs install_exes install_hdrs
 install_libs: $(TARGET_LIBS)
 	$(INSTALL) $^ $(DIST_LIB)
 install_exes: $(TARGET_EXES)
 	$(INSTALL) $^ $(DIST_BIN)
+install_hdrs: $(HEADERS) $(BNFC_HEADERS)
+	mkdir -p $(DIST_ROOT)/include/json/bnfc/Json
+	$(INSTALL) $(HEADERS) $(DIST_ROOT)/include/json
+	$(INSTALL) $(BNFC_HEADERS) $(DIST_ROOT)/include/json/bnfc/Json
 
 
 PATH += :$(TOOLS_DIR)/usr/bin
@@ -67,7 +73,7 @@ LIBDIRS		+= $(DIST_LIB) .
 LDLIBFILES	+= -lfaerieplay-common
 
 
-# FIXME: duplicated from sfdl-compiler makefile.
+# duplicated from sfdl-compiler makefile.
 ifdef TOOLS_DIR
 #HAPPYFLAGS += --template=$(TOOLS_DIR)/usr/share/happy-1.16
 #ALEXFLAGS += --template=$(TOOLS_DIR)/usr/share/alex-2.1.0
