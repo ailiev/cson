@@ -18,9 +18,9 @@
 #include <faerieplay/common/logging.h>
 #include <faerieplay/common/utils.h>
 
-#include <json/bnfc/Json/Absyn.H>
-#include <json/bnfc/Json/Printer.H>
-#include <json/bnfc/Json/Parser.H>
+#include "bnfc/Json/Absyn.H"
+#include "bnfc/Json/Printer.H"
+#include "bnfc/Json/Parser.H"
 
 #include <boost/optional/optional.hpp>
 
